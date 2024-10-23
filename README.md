@@ -178,8 +178,8 @@ located at the root of your project directory.
 
 ```sh
 # .env
-accessKeyId="<key>"
-secretAccessKey="<key>"
+ACCESSKEY_ID="<key>"
+SECRET_ACCESS_KEY="<key>"
 ```
 
 Then, you're ready to run tests:

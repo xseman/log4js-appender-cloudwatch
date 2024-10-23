@@ -14,16 +14,21 @@ on:
             - .github/workflows/**.yml
 
 jobs:
-    # test:
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - uses: actions/checkout@v4
-    #         - uses: actions/setup-node@v4
-    #           with:
-    #               node-version-file: ".nvmrc"
-    #         - run: |
-    #               npm install --silent
-    #               npm test
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+
+            - run: |
+                  echo "ACCESSKEY_ID=${{ secrets.ACCESSKEY_ID }}" >> .env
+                  echo "SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}" >> .env
+
+            - run: |
+                  npm install --silent
+                  npm test
     fmt:
         runs-on: ubuntu-latest
         steps:
