@@ -5,8 +5,12 @@ import {
 } from "@aws-sdk/client-cloudwatch-logs";
 import { layout as jsonLayout } from "log4js-layout-json";
 
-import type { RegionInputConfig } from "@smithy/config-resolver/dist-types/regionConfig/resolveRegionConfig";
-import type { AwsCredentialIdentity } from "@smithy/types/dist-types/identity/awsCredentialIdentity";
+import type {
+	RegionInputConfig,
+} from "@smithy/config-resolver/dist-types/regionConfig/resolveRegionConfig";
+import type {
+	AwsCredentialIdentity,
+} from "@smithy/types/dist-types/identity/awsCredentialIdentity";
 import type log4js from "log4js";
 
 export interface Config
@@ -124,7 +128,7 @@ export function cloudwatch(
 	if (config.createResources) {
 		cloudwatch.createLogGroup({
 			logGroupName: config.logGroupName,
-		}).catch(error => {
+		}).catch((error) => {
 			if (error.name === "ResourceAlreadyExistsException") {
 				// TODO: continue or exit
 			}
@@ -133,7 +137,7 @@ export function cloudwatch(
 		cloudwatch.createLogStream({
 			logGroupName: config.logGroupName,
 			logStreamName: config.logStreamName,
-		}).catch(error => {
+		}).catch((error) => {
 			if (error.name === "ResourceAlreadyExistsException") {
 				// TODO: continue or exit
 			}
@@ -154,7 +158,7 @@ export function cloudwatch(
 			if (streams.logStreams?.length) {
 				const stream = streams
 					.logStreams
-					.find(s => s.logStreamName === config.logStreamName);
+					.find((s) => s.logStreamName === config.logStreamName);
 
 				if (stream === undefined) {
 					throw new ConfigError("Stream name doesn't exists");

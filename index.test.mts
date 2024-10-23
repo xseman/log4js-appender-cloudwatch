@@ -25,7 +25,7 @@ function makeLogEvent(): LoggingEvent {
 		columnNumber: 0,
 		callStack: "",
 		functionName: "",
-		context: null,
+		context: { sub: "test" },
 		serialise: () => "",
 		level: new Level(20000, "INFO", "green"),
 	};
@@ -114,6 +114,7 @@ describe("AWS Integration", () => {
 			assert.equal(data.category, "default");
 			assert.equal(data.level, "INFO");
 			assert.equal(data.msg, "test");
+			assert.equal(data.sub, "test"); // from context
 		}
 	});
 });
