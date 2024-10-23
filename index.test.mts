@@ -34,8 +34,8 @@ function makeLogEvent(): LoggingEvent {
 const config = {
 	batchSize: 10,
 	bufferTimeout: 1_000,
-	accessKeyId: process.env.accessKeyId!,
-	secretAccessKey: process.env.secretAccessKey!,
+	accessKeyId: process.env.ACCESSKEY_ID!,
+	secretAccessKey: process.env.SECRET_ACCESS_KEY!,
 	region: "eu-central-1",
 	logGroupName: "prod",
 	logStreamName: "bar",
