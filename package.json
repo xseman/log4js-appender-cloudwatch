@@ -1,17 +1,14 @@
 {
 	"name": "log4js-appender-cloudwatch",
-	"version": "0.4.2",
+	"version": "0.4.1",
 	"license": "Apache-2.0",
 	"funding": "https://github.com/sponsors/xseman",
-	"homepage": "https://github.com/arch-group/log4js-appender-cloudwatch#readme",
+	"homepage": "https://github.com/xseman/log4js-appender-cloudwatch#readme",
 	"description": "Log4js cloudwatch appender",
 	"author": "Filip Seman <filip.seman@pm.me>",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/arch-group/log4js-appender-cloudwatch.git"
-	},
-	"engines": {
-		"node": ">=18.18"
+		"url": "git+https://github.com/xseman/log4js-appender-cloudwatch.git"
 	},
 	"keywords": [
 		"logging",
@@ -23,19 +20,11 @@
 		"cloudwatch",
 		"aws"
 	],
-	"files": [
-		"./dist"
-	],
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.js"
-		}
-	},
 	"scripts": {
 		"build": "tsc",
 		"pretest": "tsc",
+		"fmt": "dprint fmt",
+		"fmt:check": "dprint check",
 		"test": "node --test --env-file=.env --loader=ts-node/esm index.test.mts",
 		"test:watch": "node --test --watch --env-file=.env --loader=ts-node/esm index.test.mts"
 	},
@@ -45,12 +34,26 @@
 	},
 	"devDependencies": {
 		"@smithy/config-resolver": "~3.0.0",
-		"@types/node": "~18.18.0",
-		"dprint": "~0.45.0",
+		"@types/node": "^22.7.0",
+		"dprint": "^0.47.0",
 		"ts-node": "~10.9.0",
-		"typescript": "~5.4.5"
+		"typescript": "^5.6.0"
 	},
 	"peerDependencies": {
 		"log4js": ">=6"
+	},
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"!dist/*.test.*"
+	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"engines": {
+		"node": ">=18.18"
 	}
 }

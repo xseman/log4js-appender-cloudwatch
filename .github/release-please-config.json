@@ -5,18 +5,25 @@
 			"release-type": "node",
 			"include-v-in-tag": true,
 			"include-component-in-tag": false,
-			"pull-request-title-pattern": "v${version}"
+			"pull-request-title-pattern": "v${version}",
+			"pull-request-header": "",
+			"pull-request-footer": ""
 		}
 	},
 	"changelog-sections": [
-		{ "section": "Features", "type": "feat" },
-		{ "section": "Dependency updates", "type": "deps" },
-		{ "section": "Documentation", "type": "docs" },
-		{ "section": "Maintenance", "type": "build" },
-		{ "section": "Maintenance", "type": "chore" },
-		{ "section": "Maintenance", "type": "ci" },
-		{ "section": "Refactors", "type": "refactor" },
-		{ "section": "Styles", "type": "style" },
-		{ "section": "Tests", "type": "test", "hidden": true }
+		{ "type": "feat", "section": "Features" },
+		{ "type": "fix", "section": "Bug Fixes" },
+		{ "type": "perf", "section": "Performance Improvements" },
+		{ "type": "deps", "section": "Dependency updates" },
+		{ "type": "docs", "section": "Documentation" },
+		{ "type": "ci", "section": "Maintenance" },
+		{ "type": "build", "section": "Maintenance" },
+		{ "type": "chore", "section": "Maintenance" },
+		{ "type": "revert", "section": "Maintenance" },
+		{ "type": "security", "section": "Security" },
+		{ "type": "refactor", "section": "Refactors" },
+		{ "type": "test", "section": "Tests" },
+		{ "type": "style", "section": "Code Style", "hidden": true },
+		{ "type": "examples", "section": "Examples", "hidden": true }
 	]
 }
