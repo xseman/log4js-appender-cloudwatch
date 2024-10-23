@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.3](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.4.1...v0.4.3) (2024-10-23)
+
+
+### Maintenance
+
+* bump dependencies ([025cc41](https://github.com/xseman/log4js-appender-cloudwatch/commit/025cc4132ffc55c21f21fb5b533283e42e1db1fe))
+* bump packages, workflows & configs ([b9968ae](https://github.com/xseman/log4js-appender-cloudwatch/commit/b9968ae886ec02630bba775f647a3aeadc02524d))
+
+
+### Tests
+
+* add context data, run fmt ([09525f4](https://github.com/xseman/log4js-appender-cloudwatch/commit/09525f4b3f95a4e96e7c1b69871d4159fc55485f))
+* enable AWS test with secrets ([#10](https://github.com/xseman/log4js-appender-cloudwatch/issues/10)) ([0a12da2](https://github.com/xseman/log4js-appender-cloudwatch/commit/0a12da27a26efa46161bb8786e14f205facce297))
+
 ## [0.4.2](https://github.com/arch-group/log4js-appender-cloudwatch/compare/v0.4.1...v0.4.2) (2024-05-17)
 
 
