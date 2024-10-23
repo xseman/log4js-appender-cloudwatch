@@ -1,6 +1,6 @@
 {
 	"name": "log4js-appender-cloudwatch",
-	"version": "0.4.1",
+	"version": "0.4.3",
 	"license": "Apache-2.0",
 	"funding": "https://github.com/sponsors/xseman",
 	"homepage": "https://github.com/xseman/log4js-appender-cloudwatch#readme",
