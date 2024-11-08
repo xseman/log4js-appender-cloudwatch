@@ -170,6 +170,13 @@ Type: `string`
 
 Your AWS secret access key for authentication.
 
+### sessionToken (aws)
+
+_Optional_\
+Type: `string`
+
+Your AWS session token for authentication. This is used when you are using temporary security credentials.
+
 ## Testing
 
 To test this library during development, you'll need to provide your AWS

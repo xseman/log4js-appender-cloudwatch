@@ -17,7 +17,7 @@ export interface Config
 	extends
 		CreateLogStreamRequest,
 		Pick<RegionInputConfig, "region">,
-		Pick<AwsCredentialIdentity, "accessKeyId" | "secretAccessKey">
+		Pick<AwsCredentialIdentity, "accessKeyId" | "secretAccessKey" | "sessionToken">
 {
 	/**
 	 * defaults to http://npm.im/log4js-layout-json
@@ -122,6 +122,7 @@ export function cloudwatch(
 		credentials: {
 			accessKeyId: config.accessKeyId,
 			secretAccessKey: config.secretAccessKey,
+			sessionToken: config.sessionToken
 		},
 	});
 
