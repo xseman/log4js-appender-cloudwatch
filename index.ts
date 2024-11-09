@@ -122,7 +122,7 @@ export function cloudwatch(
 		credentials: {
 			accessKeyId: config.accessKeyId,
 			secretAccessKey: config.secretAccessKey,
-			sessionToken: config.sessionToken
+			sessionToken: config.sessionToken,
 		},
 	});
 
