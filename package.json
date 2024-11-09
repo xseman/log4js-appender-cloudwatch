@@ -25,8 +25,8 @@
 		"pretest": "tsc",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
-		"test": "node --test --env-file=.env --loader=ts-node/esm index.test.mts",
-		"test:watch": "node --test --watch --env-file=.env --loader=ts-node/esm index.test.mts"
+		"test": "node --test --test-reporter=spec --env-file=.env --loader=ts-node/esm index.test.mts",
+		"test:watch": "node --test --test-reporter=spec --watch --env-file=.env --loader=ts-node/esm index.test.mts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-cloudwatch-logs": "~3.577.0",

@@ -23,8 +23,11 @@ jobs:
                   node-version-file: ".nvmrc"
 
             - run: |
-                  echo "ACCESSKEY_ID=${{ secrets.ACCESSKEY_ID }}" >> .env
-                  echo "SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}" >> .env
+                  cat <<EOF >> .env
+                  ACCESSKEY_ID=${{ secrets.ACCESSKEY_ID }}
+                  SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+                  EOF
+                  cat .env
 
             - run: |
                   npm install --silent
