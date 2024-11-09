@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.4.3...v0.5.0) (2024-11-09)
+
+
+### Features
+
+* add aws sessionToken support ([#12](https://github.com/xseman/log4js-appender-cloudwatch/issues/12)) ([77ad176](https://github.com/xseman/log4js-appender-cloudwatch/commit/77ad176866635f0c0fa27e42c5104998aff73944))
+
+
+### Maintenance
+
+* update configs, nvmrc & test reporter ([13ac03f](https://github.com/xseman/log4js-appender-cloudwatch/commit/13ac03f9bd88b03f050cf268818a12805c486319))
+* update workflow ([f76331e](https://github.com/xseman/log4js-appender-cloudwatch/commit/f76331e42a670504cabf8bf2bd635bb775690812))
+
 ## [0.4.3](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.4.1...v0.4.3) (2024-10-23)
 
 
