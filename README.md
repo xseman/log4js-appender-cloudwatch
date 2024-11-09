@@ -3,7 +3,7 @@
 This module provides a custom appender for [log4js][log4js_github] that
 sends logs to AWS [CloudWatch][aws_cloudwatch] using the AWS [v3 SDK][cloudwatch_sdk].
 
-![visual](docs/visual.svg)
+<img src="docs/visual.svg" alt="visual" width="400px">
 
 [aws_cloudwatch]: https://aws.amazon.com/cloudwatch/
 [cloudwatch_sdk]: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cloudwatch-logs/
