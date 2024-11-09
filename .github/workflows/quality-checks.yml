@@ -1,7 +1,11 @@
 name: quality checks
 
 on:
-    pull_request:
+    # manual
+    workflow_dispatch:
+    # pull_request:
+    # this will inclue secrets of the repo in pull requests
+    pull_request_target:
         branches:
             - master
     push:
