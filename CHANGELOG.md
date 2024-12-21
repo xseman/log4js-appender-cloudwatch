@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.5.0...v0.5.1) (2024-12-21)
+
+
+### Documentation
+
+* update diagram ([#14](https://github.com/xseman/log4js-appender-cloudwatch/issues/14)) ([60df376](https://github.com/xseman/log4js-appender-cloudwatch/commit/60df37635ffaec80af84c3878b1983ff1be03f7e))
+
 ## [0.5.0](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.4.3...v0.5.0) (2024-11-09)
 
 
