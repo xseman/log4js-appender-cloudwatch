@@ -7,6 +7,12 @@ sends logs to AWS [CloudWatch][aws_cloudwatch] using the AWS [v3 SDK][cloudwatch
 [cloudwatch_sdk]: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cloudwatch-logs/
 [log4js_github]: https://log4js-node.github.io/log4js-node/
 
+## Features
+
+- **Batching**: Send multiple log events in a single request to CloudWatch
+- **Buffering**: Send logs after a specified timeout, regardless of the batch size
+- **Log Group and Stream Creation**: Automatically create log groups and streams
+
 ## Overview
 
 <img src="docs/sequence.svg" alt="sequence" width="700px">
