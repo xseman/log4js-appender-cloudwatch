@@ -1,7 +1,10 @@
 import {
 	CloudWatchLogs,
-	CreateLogStreamRequest,
-	InputLogEvent,
+	type CreateLogStreamRequest,
+	type InputLogEvent,
+	ResourceAlreadyExistsException,
+	ResourceNotFoundException,
+	UnrecognizedClientException,
 } from "@aws-sdk/client-cloudwatch-logs";
 import { layout as jsonLayout } from "log4js-layout-json";
 
@@ -13,11 +16,13 @@ import type {
 } from "@smithy/types/dist-types/identity/awsCredentialIdentity";
 import type log4js from "log4js";
 
-export interface Config
-	extends
-		CreateLogStreamRequest,
-		Pick<RegionInputConfig, "region">,
-		Pick<AwsCredentialIdentity, "accessKeyId" | "secretAccessKey" | "sessionToken">
+export interface Config extends
+	CreateLogStreamRequest,
+	Pick<RegionInputConfig, "region">,
+	Pick<
+		AwsCredentialIdentity,
+		"accessKeyId" | "secretAccessKey" | "sessionToken"
+	>
 {
 	/**
 	 * defaults to http://npm.im/log4js-layout-json
@@ -50,16 +55,16 @@ declare module "log4js" {
 	}
 }
 
-class LogBuffer {
+export class LogBuffer {
 	private _timer: NodeJS.Timeout | null;
 	private _logs: Array<InputLogEvent>;
 
 	constructor(
-		private config: Config,
+		private _config: Config,
 		private _onReleaseCallback: (logs: Array<InputLogEvent>) => void,
 	) {
 		this._timer = null;
-		this._logs = new Array();
+		this._logs = [];
 	}
 
 	/**
@@ -67,8 +72,8 @@ class LogBuffer {
 	 *
 	 * @param message - The log message to be pushed. If it's an
 	 *     object, it will be converted to a JSON string.
-	 *
-	 * @param - The timestamp of the log
+	 * f
+	 * @param timestamp - The timestamp of the log
 	 *     message. If not provided, the current timestamp will be used.
 	 */
 	public push(message: string, timestamp?: number): void {
@@ -83,7 +88,7 @@ class LogBuffer {
 			timestamp: timestamp,
 		});
 
-		if (this._logs.length >= this.config.batchSize) {
+		if (this._logs.length >= this._config.batchSize) {
 			this.release();
 			return;
 		}
@@ -91,7 +96,7 @@ class LogBuffer {
 		if (this._timer === null) {
 			this._timer = globalThis.setTimeout(() => {
 				this.release();
-			}, this.config.bufferTimeout);
+			}, this._config.bufferTimeout);
 			return;
 		}
 	}
@@ -109,91 +114,114 @@ class LogBuffer {
 	}
 }
 
-/**
- * TODO: create async method for appender creation
- * 		 (for now log4js doesn't support async configure module)
- */
-export function cloudwatch(
-	config: Config,
-	layout: log4js.LayoutFunction,
-): log4js.AppenderFunction {
-	const cloudwatch = new CloudWatchLogs({
-		region: config.region,
-		credentials: {
-			accessKeyId: config.accessKeyId,
-			secretAccessKey: config.secretAccessKey,
-			sessionToken: config.sessionToken,
-		},
-	});
-
-	if (config.createResources) {
-		cloudwatch.createLogGroup({
-			logGroupName: config.logGroupName,
-		}).catch((error) => {
-			if (error.name === "ResourceAlreadyExistsException") {
-				// TODO: continue or exit
-			}
-		});
-
-		cloudwatch.createLogStream({
-			logGroupName: config.logGroupName,
-			logStreamName: config.logStreamName,
-		}).catch((error) => {
-			if (error.name === "ResourceAlreadyExistsException") {
-				// TODO: continue or exit
-			}
-		});
-	} else {
-		cloudwatch.describeLogGroups({
-			logGroupNamePrefix: config.logGroupName,
-		}).then((group) => {
-			if (group.logGroups?.length === 0) {
-				throw new ConfigError("Log group doesn't exists");
-			}
-		});
-
-		cloudwatch.describeLogStreams({
-			logGroupName: config.logGroupName,
-			logStreamNamePrefix: config.logStreamName,
-		}).then((streams) => {
-			if (streams.logStreams?.length) {
-				const stream = streams
-					.logStreams
-					.find((s) => s.logStreamName === config.logStreamName);
-
-				if (stream === undefined) {
-					throw new ConfigError("Stream name doesn't exists");
-				}
-			}
-		});
+export class CloudwatchAppender {
+	constructor(
+		private _config: Config,
+		private _layout: log4js.LayoutFunction,
+		private _logEventBuffer: LogBuffer,
+		private _cloudwatchClient: CloudWatchLogs,
+	) {
+		if (this._config.createResources) {
+			this.createLogGroups();
+		} else {
+			this.initializeLogGroups();
+		}
 	}
 
 	/**
-	 * TODO: integrate limitation to LogBuffer
-	 *
-	 * constraints:
-	 * - The maximum batch size is 1,048,576 bytes. This size is calculated as the sum of all event messages in UTF-8, plus 26 bytes for each log event.
-	 * - None of the log events in the batch can be more than 2 hours in the future.
-	 * - None of the log events in the batch can be more than 14 days in the past. Also, none of the log events can be from earlier than the retention period of the log group.
-	 * - The log events in the batch must be in chronological order by their timestamp. The timestamp is the time that the event occurred, expressed as the number of milliseconds after Jan 1, 1970 00:00:00 UTC. (In Amazon Web Services Tools for PowerShell and the Amazon Web Services SDK for .NET, the timestamp is specified in .NET format: yyyy-mm-ddThh:mm:ss. For example, 2017-09-15T13:45:30.)
-	 * - Each log event can be no larger than 256 KB.
-	 * - A batch of log events in a single request cannot span more than 24 hours. Otherwise, the operation fails.
-	 * - The maximum number of log events in a batch is 10,000.
+	 * Creates log groups and streams in CloudWatch if they don't exist.
+	 * If resources already exist, the creation requests are silently ignored.
 	 */
-	const buffer = new LogBuffer(config, (logs): void => {
-		cloudwatch.putLogEvents({
-			logEvents: logs,
-			logGroupName: config.logGroupName,
-			logStreamName: config.logStreamName,
-		});
-	});
+	private createLogGroups(): void {
+		this._cloudwatchClient
+			.createLogGroup({
+				logGroupName: this._config.logGroupName,
+			})
+			.catch((error) => {
+				if (error instanceof ResourceAlreadyExistsException) {
+					// NOTE: continue, nothing to do
+				}
+			})
+			.finally(() => {
+				this._cloudwatchClient
+					.createLogStream({
+						logGroupName: this._config.logGroupName,
+						logStreamName: this._config.logStreamName,
+					})
+					.catch((error) => {
+						if (error instanceof ResourceAlreadyExistsException) {
+							// NOTE: continue, nothing to do
+						}
+					});
+			});
+	}
 
-	return function appender(loggingEvent: log4js.LoggingEvent): void {
-		const msg = layout(loggingEvent);
-		const time = loggingEvent.startTime.getTime();
+	/**
+	 * Verifies that the configured log groups and streams exist in CloudWatch.
+	 *
+	 * @throws {ConfigError} If log group/stream doesn't exist or credentials are invalid
+	 */
+	private initializeLogGroups(): void {
+		this._cloudwatchClient
+			.describeLogGroups({
+				logGroupNamePrefix: this._config.logGroupName,
+			})
+			.then((group) => {
+				if (group.logGroups?.length === 0) {
+					throw new ConfigError("Log group doesn't exist");
+				}
+			})
+			.catch((error) => {
+				if (error instanceof ResourceNotFoundException) {
+					// TODO: handle error
+				}
+			});
 
-		buffer.push(msg, time);
-	};
+		this._cloudwatchClient
+			.describeLogStreams({
+				logGroupName: this._config.logGroupName,
+				logStreamNamePrefix: this._config.logStreamName,
+			})
+			.then((streams) => {
+				if (streams.logStreams?.length) {
+					const streamExists = streams
+						.logStreams
+						.find((s) => s.logStreamName === this._config.logStreamName);
+
+					if (!streamExists) {
+						throw new ConfigError("Stream name doesn't exist");
+					}
+				}
+			})
+			.catch((error) => {
+				if (error instanceof UnrecognizedClientException) {
+					throw new ConfigError("Invalid credentials");
+				}
+
+				if (error instanceof ResourceNotFoundException) {
+					// TODO: handle error
+				}
+
+				throw error;
+			});
+	}
+
+	/**
+	 * Returns the appender function that will be used by log4js.
+	 *
+	 * The function processes logging events by formatting them using the configured layout
+	 * and buffering them for batch processing.
+	 *
+	 * @returns {log4js.AppenderFunction} The function that will handle logging events
+	 */
+	public appenderFunction(): log4js.AppenderFunction {
+		return (loggingEvent: log4js.LoggingEvent): void => {
+			const message = this._layout(loggingEvent);
+			const time = loggingEvent.startTime.getTime();
+
+			this._logEventBuffer.push(message, time);
+		};
+	}
 }
 
 export class ConfigError extends Error {
@@ -204,14 +232,40 @@ export class ConfigError extends Error {
 	}
 }
 
+export function createLogEventHandler(
+	cloudwatchClient: CloudWatchLogs,
+	config: Config,
+): LogBuffer["_onReleaseCallback"] {
+	return function handleLogRelease(logEventBatch: InputLogEvent[]): void {
+		cloudwatchClient.putLogEvents({
+			logEvents: logEventBatch,
+			logGroupName: config.logGroupName,
+			logStreamName: config.logStreamName,
+		});
+	};
+}
+
 export function configure(
 	config: Config,
 	layouts: log4js.LayoutsParam,
 	_findAppender: () => log4js.AppenderFunction,
 	_levels: log4js.Levels,
 ): log4js.AppenderFunction {
-	let layout: log4js.LayoutFunction | undefined;
+	const cloudwatchClient = new CloudWatchLogs({
+		region: config.region,
+		credentials: {
+			accessKeyId: config.accessKeyId,
+			secretAccessKey: config.secretAccessKey,
+			sessionToken: config.sessionToken,
+		},
+	});
 
+	const buffer = new LogBuffer(
+		config,
+		createLogEventHandler(cloudwatchClient, config),
+	);
+
+	let layout: log4js.LayoutFunction | undefined;
 	if (config.layout) {
 		// @ts-ignore: bad typings "config: PatternToken"
 		layout = layouts.layout(config.layout.type, config.layout);
@@ -219,6 +273,12 @@ export function configure(
 		layout = jsonLayout();
 	}
 
-	const appender = cloudwatch(config, layout);
-	return appender;
+	const appender = new CloudwatchAppender(
+		config,
+		layout,
+		buffer,
+		cloudwatchClient,
+	);
+
+	return appender.appenderFunction;
 }
