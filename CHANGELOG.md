@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.0](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.5.0...v0.6.0) (2024-12-22)
+
+
+### Documentation
+
+* update diagram ([#14](https://github.com/xseman/log4js-appender-cloudwatch/issues/14)) ([60df376](https://github.com/xseman/log4js-appender-cloudwatch/commit/60df37635ffaec80af84c3878b1983ff1be03f7e))
+* update README to include features section ([b0b58ab](https://github.com/xseman/log4js-appender-cloudwatch/commit/b0b58ab839c7fa1ca2c5357b8ba5e1ef3d592bbf))
+
+
+### Maintenance
+
+* update quality checks & deps ([10c3d97](https://github.com/xseman/log4js-appender-cloudwatch/commit/10c3d970ccb555602850546df06da7888e47537d))
+
+
+### Refactors
+
+* decouple initialization modules ([d6f52da](https://github.com/xseman/log4js-appender-cloudwatch/commit/d6f52dab292ed1a4c8e00696b95e71098287c75e))
+
+
+### Tests
+
+* add LogBuffer ([c6df67b](https://github.com/xseman/log4js-appender-cloudwatch/commit/c6df67b6a0dbfeaf3c7a051e1918acff76a27bbe))
+
 ## [0.5.0](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.4.3...v0.5.0) (2024-11-09)
 
 
