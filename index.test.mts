@@ -22,26 +22,44 @@ import {
 	LogBuffer,
 } from "./dist/index.js";
 
-import type { LoggingEvent } from "log4js";
-
-// NOTE: to run this test node v20.6+ is required for native .env loader
-// nvm install && nvm use
-
-function makeLogEvent(): LoggingEvent {
-	return {
-		categoryName: "default",
-		startTime: new Date(),
-		data: ["test"],
-		pid: 0,
-		fileName: "",
-		lineNumber: 0,
-		columnNumber: 0,
-		callStack: "",
-		functionName: "",
-		context: { sub: "test" },
-		serialise: () => "",
-		level: new Level(20000, "INFO", "green"),
+describe("LogBuffer", () => {
+	const logbufferConfig: Config = {
+		batchSize: 5,
+		bufferTimeout: 500,
+		accessKeyId: process.env.ACCESSKEY_ID!,
+		secretAccessKey: process.env.SECRET_ACCESS_KEY!,
+		logGroupName: "",
+		logStreamName: "",
 	};
+
+	test("should release logs when batch size is reached", () => {
+		const mockCallback = (logs: Array<InputLogEvent>) => {
+			assert.equal(logs.length, 5);
+		};
+
+		const logbuffer = new LogBuffer(logbufferConfig, mockCallback);
+
+		for (let i = 0; i < 5; i++) {
+			logbuffer.push(`log message ${i}`);
+		}
+	});
+
+	test("should release logs when buffer timeout is reached", async () => {
+		const mockCallback = (logs: Array<InputLogEvent>) => {
+			assert.equal(logs.length, 3);
+		};
+
+		const logbuffer = new LogBuffer(logbufferConfig, mockCallback);
+
+		for (let i = 0; i < 3; i++) {
+			logbuffer.push(`log message ${i}`);
+		}
+
+		// Wait for buffer timeout
+		await sleep(600);
+	});
+});
+
 function makeLogEvent() {
 	return new LoggingEvent(
 		"default",
