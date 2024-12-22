@@ -18,7 +18,7 @@ on:
             - .github/workflows/**.yml
 
 jobs:
-    test:
+    checks:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -33,9 +33,18 @@ jobs:
                   EOF
                   cat .env
 
-            - run: |
+            - name: install dependencies
+              run: |
                   npm install --silent
+
+            - name: typecheck
+              run: |
+                  npm run typecheck
+
+            - name: test
+              run: |
                   npm test
+
     fmt:
         runs-on: ubuntu-latest
         steps:

@@ -22,11 +22,15 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"pretest": "tsc",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
-		"test": "node --test --test-reporter=spec --env-file=.env --loader=ts-node/esm index.test.mts",
-		"test:watch": "node --test --test-reporter=spec --watch --env-file=.env --loader=ts-node/esm index.test.mts"
+		"typecheck": "tsc --noEmit",
+		"pretest": "tsc",
+		"test": "TS_NODE_TRANSPILE_ONLY=true node --no-warnings --test --experimental-test-coverage --test-reporter=spec --env-file=.env --loader=ts-node/esm *.test.mts",
+		"test:watch": "TS_NODE_TRANSPILE_ONLY=true node --no-warnings --test --test-reporter=spec --watch --env-file=.env --loader=ts-node/esm *.test.mts"
+	},
+	"peerDependencies": {
+		"log4js": ">=6.7"
 	},
 	"dependencies": {
 		"@aws-sdk/client-cloudwatch-logs": "~3.577.0",
@@ -37,23 +41,17 @@
 		"@types/node": "^22.7.0",
 		"dprint": "^0.47.0",
 		"ts-node": "~10.9.0",
-		"typescript": "^5.6.0"
-	},
-	"peerDependencies": {
-		"log4js": ">=6"
+		"typescript": "^5.7.0"
 	},
 	"types": "./dist/index.d.ts",
-	"files": [
-		"dist",
-		"!dist/*.test.*"
-	],
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
 			"require": "./dist/index.js"
 		}
 	},
-	"engines": {
-		"node": ">=18.18"
-	}
+	"files": [
+		"dist",
+		"!dist/*.test.*"
+	]
 }
