@@ -1,0 +1,9 @@
+{
+	// Tests are excluded from the build config. They run on Bun, so they get Bun's types here.
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"types": ["node", "bun"]
+	},
+	"include": ["index_test.ts"]
+}

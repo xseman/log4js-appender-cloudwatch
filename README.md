@@ -197,8 +197,9 @@ ACCESSKEY_ID="<key>"
 SECRET_ACCESS_KEY="<key>"
 ```
 
-Then, you're ready to run tests:
+Tests run on [Bun](https://bun.sh), which loads `.env` automatically. Without
+the credentials, the AWS integration tests are skipped.
 
 ```sh
-npm test
+bun run test
 ```

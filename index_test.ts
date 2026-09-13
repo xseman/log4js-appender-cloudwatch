@@ -1,76 +1,74 @@
-import assert from "node:assert";
-import process from "node:process";
 import {
 	describe,
+	expect,
 	test,
-} from "node:test";
+} from "bun:test";
+import process from "node:process";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import {
 	CloudWatchLogs,
 	type InputLogEvent,
 } from "@aws-sdk/client-cloudwatch-logs";
+import log4js from "log4js";
+import { levels } from "log4js";
 import { layout as jsonLayout } from "log4js-layout-json";
-
-import Level from "log4js/lib/levels.js";
+// @ts-ignore: missing type definitions
 import LoggingEvent from "log4js/lib/LoggingEvent.js";
 
 import {
 	CloudwatchAppender,
-	Config,
+	type Config,
 	createLogEventHandler,
 	LogBuffer,
-} from "./dist/index.js";
+} from "./index.js";
 
 describe("LogBuffer", () => {
 	const logbufferConfig: Config = {
 		batchSize: 5,
 		bufferTimeout: 500,
-		accessKeyId: process.env.ACCESSKEY_ID!,
-		secretAccessKey: process.env.SECRET_ACCESS_KEY!,
+		accessKeyId: "",
+		secretAccessKey: "",
 		logGroupName: "",
 		logStreamName: "",
 	};
 
 	test("should release logs when batch size is reached", () => {
-		const mockCallback = (logs: Array<InputLogEvent>) => {
-			assert.equal(logs.length, 5);
-		};
-
-		const logbuffer = new LogBuffer(logbufferConfig, mockCallback);
+		const released: Array<InputLogEvent[]> = [];
+		const logbuffer = new LogBuffer(logbufferConfig, (logs) => released.push(logs));
 
 		for (let i = 0; i < 5; i++) {
 			logbuffer.push(`log message ${i}`);
 		}
+
+		expect(released).toHaveLength(1);
+		expect(released[0]).toHaveLength(5);
 	});
 
 	test("should release logs when buffer timeout is reached", async () => {
-		const mockCallback = (logs: Array<InputLogEvent>) => {
-			assert.equal(logs.length, 3);
-		};
-
-		const logbuffer = new LogBuffer(logbufferConfig, mockCallback);
+		const released: Array<InputLogEvent[]> = [];
+		const logbuffer = new LogBuffer(logbufferConfig, (logs) => released.push(logs));
 
 		for (let i = 0; i < 3; i++) {
 			logbuffer.push(`log message ${i}`);
 		}
+		expect(released).toHaveLength(0);
 
 		// Wait for buffer timeout
 		await sleep(600);
+
+		expect(released).toHaveLength(1);
+		expect(released[0]).toHaveLength(3);
 	});
 });
 
-function makeLogEvent() {
-	return new LoggingEvent(
-		"default",
-		new Level(20000, "INFO", "green"),
-		["test"],
-		{ sub: "test" },
-		undefined,
-	);
+function makeLogEvent(): log4js.LoggingEvent {
+	return new LoggingEvent("default", levels.INFO, ["test"], { sub: "test" });
 }
 
-describe("AWS Integration", () => {
+const hasCredentials = Boolean(process.env.ACCESSKEY_ID && process.env.SECRET_ACCESS_KEY);
+
+describe.skipIf(!hasCredentials)("AWS Integration", () => {
 	const config: Config = {
 		batchSize: 10,
 		bufferTimeout: 1_000,
@@ -109,8 +107,7 @@ describe("AWS Integration", () => {
 
 		// NOTE: batch is pushed after 10 events
 		for (let i = 0; i < 10; i++) {
-			const logEvent = makeLogEvent();
-			append(logEvent);
+			append(makeLogEvent());
 		}
 		// NOTE: wait for 2s to ensure all events are processed
 		await sleep(2_000);
@@ -121,15 +118,16 @@ describe("AWS Integration", () => {
 			logStreamName: config.logStreamName,
 			logGroupName: config.logGroupName,
 		});
-		assert.equal(data.events?.length, 10);
+		expect(data.events).toHaveLength(10);
 
 		for (const e of data.events!) {
-			const data = JSON.parse(e.message!);
-			assert.equal(data.category, "default");
-			assert.equal(data.level, "INFO");
-			assert.equal(data.msg, "test");
+			expect(JSON.parse(e.message!)).toMatchObject({
+				category: "default",
+				level: "INFO",
+				msg: "test",
+			});
 		}
-	});
+	}, 15_000);
 
 	test("wait for buffer timeout", async () => {
 		const layout = jsonLayout();
@@ -144,8 +142,7 @@ describe("AWS Integration", () => {
 
 		// NOTE: batch is pushed after 10 events
 		for (let i = 0; i < 5; i++) {
-			const logEvent = makeLogEvent();
-			append(logEvent);
+			append(makeLogEvent());
 		}
 
 		// NOTE: wait for 2s for buffer timeout
@@ -157,14 +154,15 @@ describe("AWS Integration", () => {
 			logStreamName: config.logStreamName,
 			logGroupName: config.logGroupName,
 		});
-		assert.equal(data.events?.length, 5);
+		expect(data.events).toHaveLength(5);
 
 		for (const e of data.events!) {
-			const data = JSON.parse(e.message!);
-			assert.equal(data.category, "default");
-			assert.equal(data.level, "INFO");
-			assert.equal(data.msg, "test");
-			assert.equal(data.sub, "test"); // from context
+			expect(JSON.parse(e.message!)).toMatchObject({
+				category: "default",
+				level: "INFO",
+				msg: "test",
+				sub: "test", // from context
+			});
 		}
-	});
+	}, 15_000);
 });
