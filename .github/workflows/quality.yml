@@ -3,6 +3,11 @@ name: quality checks
 on:
     # manual
     workflow_dispatch:
+        inputs:
+            pr_number:
+                description: "PR number to run coverage for"
+                required: false
+                type: string
     # pull_request:
     # this will inclue secrets of the repo in pull requests
     pull_request_target:
@@ -17,9 +22,17 @@ on:
             - tsconfig*.json
             - .github/workflows/**.yml
 
+permissions:
+    contents: read
+    pull-requests: write
+    actions: write
+
 jobs:
     checks:
         runs-on: ubuntu-latest
+        concurrency:
+            group: log4js-appender-cloudwatch-coverage-comment-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.ref }}
+            cancel-in-progress: false
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
@@ -44,6 +57,15 @@ jobs:
                   SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
               run: |
                   npm test
+
+            - name: Coverage report
+              if: (github.event_name == 'pull_request_target' && !startsWith(github.head_ref, 'release-please--')) || github.event_name == 'workflow_dispatch'
+              uses: xseman/coverage@v0.4.0
+              with:
+                  pull-request-number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+                  update-comment-marker: "<!-- coverage-reporter-log4js-appender-cloudwatch -->"
+                  coverage-artifact-paths: |
+                      bun:coverage/lcov.info
 
     fmt:
         runs-on: ubuntu-latest
