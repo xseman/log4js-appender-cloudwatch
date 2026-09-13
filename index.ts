@@ -280,5 +280,5 @@ export function configure(
 		cloudwatchClient,
 	);
 
-	return appender.appenderFunction;
+	return appender.appenderFunction();
 }
