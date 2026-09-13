@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.6.0...v0.6.1) (2026-09-13)
+
+
+### Tests
+
+* run tests with bun ([#19](https://github.com/xseman/log4js-appender-cloudwatch/issues/19)) ([b6fa8a3](https://github.com/xseman/log4js-appender-cloudwatch/commit/b6fa8a3fad1255ff1f3bdae96b1304603537f877))
+
 ## [0.6.0](https://github.com/xseman/log4js-appender-cloudwatch/compare/v0.5.0...v0.6.0) (2024-12-22)
 
 
